@@ -1,14 +1,23 @@
+function between(x, a, b) {
+  return x > a && x < b;
+}
+
 const physics = (() => {
   return {
     AABB: class {
-      constructor(box_origin, box_dims) {
-        this.origin = box_origin;
-        this.dims = box.dims;
+      // padding is applied to top and left sides
+      constructor(box_origin, box_dims, padding) {
+        this.origin = box_origin.sub(padding);
+        this.dims = box_dims.mult(2);
       }
-      // padding only applied to top and left
-      intersect(lineStart, lineDir, aabb, paddingX, paddingY) {
-        
+      isPointIn(point) {
+        return between(point.x, this.origin.x, this.origin.x + this.dims.x) &&
+               between(point.y, this.origin.y, this.origin.y + this.dims.y);
       }
+      
+
+
+      
     }
   }
 })();
