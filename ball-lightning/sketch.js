@@ -10,7 +10,7 @@ function preload() {
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  player = new Player(width/2, height/2);
+  player = new Player(2, -4);
   level = level_manager.load(0);
   cam.calculateCameraStartPos(level.spawnPos, level.w, level.h);
 }
@@ -21,6 +21,7 @@ function draw() {
   bg.draw();
   level.draw();
   player.draw();
+  physics.update_physics(player);
 }
 
 function mouseWheel(event) {

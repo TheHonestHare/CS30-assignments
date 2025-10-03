@@ -1,11 +1,11 @@
 class Player {
   constructor(x, y) {
-    this.pos = createVector(x, y);
+    this.aabb = new physics.AABB(createVector(x, y), createVector(1, 1));
     this.vel = createVector(0, 0);
   }
   draw() {
     fill("yellow");
-    image(player_img, level.spawnPos.x * 8, level.spawnPos.y * 8, 8, 8);
+    image(player_img, this.aabb.origin.x * 8, this.aabb.origin.y * 8, this.aabb.dims.x * 8, this.aabb.dims.y * 8);
   }
   process_input() {
     if(keyIsDown("W".charCodeAt(0))) {
