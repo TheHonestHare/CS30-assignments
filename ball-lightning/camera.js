@@ -8,6 +8,6 @@ const cam = {
   },
   "transform": function () {
     translate(this.pos);
-    scale(this.zoom);
+    scale(this.zoom * 8);
   }
 };

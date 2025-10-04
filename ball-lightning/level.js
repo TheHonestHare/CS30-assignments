@@ -17,7 +17,7 @@ class Level {
   }
   draw() {
     noSmooth();
-    image(this.image, 0, 0, this.w * 8, this.h * 8);
+    image(this.image, 0, 0, this.w, this.h);
     smooth();
   }
 }

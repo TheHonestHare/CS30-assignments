@@ -1,6 +1,10 @@
 function between(x, a, b) {
   return x > a && x < b;
 }
+// Custom clamp function
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(value, max));
+}
 
 const physics = (() => {
   return {
@@ -12,6 +16,9 @@ const physics = (() => {
       }
     },
     AABB: class {
+      draw() {
+        rect(this.origin.x, this.origin.y, this.dims.x, this.dims.y);
+      }
       // padding is applied to top and left sides
       constructor(box_origin, box_dims, padding) {
         if(!padding) {
@@ -47,15 +54,17 @@ const physics = (() => {
         const time = clamp(nearTime, 0, 1);
         const normal = createVector();
         if (nearTimeX > nearTimeY) {
-          normal.x = -signX;
+          normal.x = isNegX ? 1 : -1;
           normal.y = 0;
         } else {
           normal.x = 0;
-          normal.y = -signY;
+          normal.y = isNegY ? 1 : -1;
         }
         const coll_pos = createVector();
         coll_pos.x = pos.x + delta.x * time;
         coll_pos.y = pos.y + delta.y * time;
+        fill("green");
+        ellipse(coll_pos.x, coll_pos.y, 0.1, 0.1);
         return new physics.Hit(coll_pos, normal, time);
       }
 
@@ -63,36 +72,20 @@ const physics = (() => {
       sweepAABB(other_box, delta) {
         const new_box = new physics.AABB(this.origin, this.dims, other_box.dims);
 
-        const res = this.intersectSegment(other_box.origin, delta, other_box.dims);
-        if (res) {
-          // sweep.pos.x = box.pos.x + delta.x * sweep.time;
-          // sweep.pos.y = box.pos.y + delta.y * sweep.time;
-          // const direction = delta.clone();
-          // direction.normalize();
-          // sweep.hit.pos.x = clamp(
-          //   sweep.hit.pos.x + direction.x * box.half.x,
-          //   this.pos.x - this.half.x,
-          //   this.pos.x + this.half.x
-          // );
-          // sweep.hit.pos.y = clamp(
-          //   sweep.hit.pos.y + direction.y * box.half.y,
-          //   this.pos.y - this.half.y,
-          //   this.pos.y + this.half.y
-          // );
-        }
+        const res = new_box.intersectSegment(other_box.origin, delta, other_box.dims);
         return res;
       }
     },
     update_physics(thing) {
       if(thing.aabb === undefined || thing.vel === undefined) return;
       const box = new physics.AABB(createVector(0, 0), createVector(30, 1));
-      const res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime));
-      if(res !== null) {
-        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime));
-        //thing.vel.add(p5.Vector.mult(createVector(0, 0.01, deltaTime)));
+      const res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));
+      if(res === null) {
+        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
+        thing.vel.add(createVector(0, 0.9).mult(deltaTime / 1000));
       }
       else {
-        //console.log("OH NO");
+        thing.aabb.origin = res.pos;
       }
       
     }
