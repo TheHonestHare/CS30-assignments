@@ -29,6 +29,28 @@ const physics = (() => {
           this.dims = p5.Vector.add(box_dims, padding);
         }
       }
+      pointIn(point) {
+        return this.origin.x < point.x && point.x < this.origin.x + this.dims.x && this.origin.y < point.y && point.y < this.origin.y + this.dims.y;
+      }
+      // other_box is the moving box
+      push_aabb_out(other_box) {
+        const diff = p5.Vector.sub(this.origin, other_box.origin);
+        const p = p5.Vector.add(this.dims, other_box.dims).sub(createVector(Math.abs(diff.x), Math.abs(diff.y)));
+
+        if (p.x <= 0 || p.y <= 0) return null;
+        const hit = new physics.Hit();
+        if(p.x < p.y) {
+          hit.pos = createVector(this.origin.x + this.dims.x * (diff.x < 0), other_box.origin.y);
+          hit.normal = createVector(Math.sign(diff.x), 0);
+          hit.time = 0;
+        } else {
+          hit.pos = createVector(other_box.origin.x, this.origin.y + this.dims.y * (diff.y > 0));
+          hit.normal = createVector(0, Math.sign(diff.y));
+          hit.time = 0;
+        }
+        return hit;
+
+      }
       isPointIn(point) {
         return between(point.x, this.origin.x, this.origin.x + this.dims.x) &&
                between(point.y, this.origin.y, this.origin.y + this.dims.y);
@@ -69,8 +91,10 @@ const physics = (() => {
       }
 
       // adapted from https://noonat.github.io/intersect
+      // other_box is the moving box
       sweepAABB(other_box, delta) {
         const new_box = new physics.AABB(this.origin, this.dims, other_box.dims);
+        if(new_box.isPointIn(other_box.origin)) return this.push_aabb_out(other_box);
 
         const res = new_box.intersectSegment(other_box.origin, delta, other_box.dims);
         return res;
@@ -81,7 +105,6 @@ const physics = (() => {
       if(thing.aabb === undefined || thing.vel === undefined) return;
 
       let res;
-      console.log()
       for(let i = 0; i < level.w; i++) {
         for(let j = 0; j < level.h; j++) {
           // there's no block so just air, move on
@@ -96,16 +119,15 @@ const physics = (() => {
       if(res === undefined) {
         thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
         thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
-        if(thing.onGround) {
-          console.log("changed");
-          console.log(thing.vel);
-        }
+        // if(thing.onGround) {
+        //   console.log("changed");
+        //   console.log(thing.vel);
+        // }
         thing.onGround = false;
       } else {
-        console.log(`x: ${res.normal.x}, y: ${res.normal.y}`);
         // collided with at least one thing
         thing.aabb.origin = res.pos;
-        if(Math.sign(res.normal.x) === Math.sign(thing.vel.x))
+        if(Math.sign(res.normal.x) === Math.sign(thing.vel.x));
         if(res.normal.x !== 0) thing.vel.x = 0;
         if(res.normal.y !== 0) {
           thing.vel.y = 0;
@@ -113,7 +135,7 @@ const physics = (() => {
           thing.onGround = true;
         }
         // TODO: we need to do a second collision check to make sure they didn't hit another wall
-        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000 * res.time));
+        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000 * (1-res.time)));
       }
       // apply friction
       if(thing.onGround) {
