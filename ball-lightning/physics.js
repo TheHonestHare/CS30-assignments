@@ -48,7 +48,7 @@ const physics = (() => {
         }
         const nearTime = nearTimeX > nearTimeY ? nearTimeX : nearTimeY;
         const farTime = farTimeX < farTimeY ? farTimeX : farTimeY;
-        if (nearTime >= 1 || farTime <= 0) {
+        if (nearTime >= 1 || farTime <= 0 || isNaN(nearTime) || isNaN(farTime)) {
           return null;
         }
         const time = clamp(nearTime, 0, 1);
@@ -77,15 +77,47 @@ const physics = (() => {
       }
     },
     update_physics(thing) {
+      // precondition
       if(thing.aabb === undefined || thing.vel === undefined) return;
-      const box = new physics.AABB(createVector(0, 0), createVector(30, 1));
-      const res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));
-      if(res === null) {
-        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
-        thing.vel.add(createVector(0, 0.9).mult(deltaTime / 1000));
+
+      let res;
+      console.log()
+      for(let i = 0; i < level.w; i++) {
+        for(let j = 0; j < level.h; j++) {
+          // there's no block so just air, move on
+          if(!level.block_array[j * level.w + i]) continue;
+          const box = new physics.AABB(createVector(i, j), createVector(1, 1));
+          const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
+          if(temp_res === null) continue;
+          if(res === undefined || temp_res.time < res.time) res = temp_res;
+        }
       }
-      else {
+      // didn't collide with any blocks
+      if(res === undefined) {
+        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
+        thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
+        if(thing.onGround) {
+          console.log("changed");
+          console.log(thing.vel);
+        }
+        thing.onGround = false;
+      } else {
+        console.log(`x: ${res.normal.x}, y: ${res.normal.y}`);
+        // collided with at least one thing
         thing.aabb.origin = res.pos;
+        if(Math.sign(res.normal.x) === Math.sign(thing.vel.x))
+        if(res.normal.x !== 0) thing.vel.x = 0;
+        if(res.normal.y !== 0) {
+          thing.vel.y = 0;
+          // if player hits block from top they are grounded and friction is applied
+          thing.onGround = true;
+        }
+        // TODO: we need to do a second collision check to make sure they didn't hit another wall
+        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000 * res.time));
+      }
+      // apply friction
+      if(thing.onGround) {
+        thing.vel.x -= thing.vel.x * 0.5;
       }
       
     }
