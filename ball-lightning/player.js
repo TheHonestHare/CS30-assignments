@@ -6,6 +6,7 @@ class Player {
   }
   draw() {
     fill("yellow");
+    player.aabb.draw();
     image(player_img, this.aabb.origin.x, this.aabb.origin.y, this.aabb.dims.x, this.aabb.dims.y);
   }
   process_input() {
@@ -16,10 +17,13 @@ class Player {
       this.vel.y += 10 * deltaTime / 1000;
     }
     if(keyIsDown("A".charCodeAt(0))) {
-      this.vel.x = -6;
+      this.vel.x = -3;
     }
     if(keyIsDown("D".charCodeAt(0))) {
-      this.vel.x = 6;
+      this.vel.x = 3;
+    }
+    if(keyIsDown(" ".charCodeAt(0))) {
+      console.log(`x: ${this.aabb.origin.x}, y: ${this.aabb.origin.y}, vel.x: ${this.vel.x}, vel.y: ${this.vel.y}`);
     }
 
   }

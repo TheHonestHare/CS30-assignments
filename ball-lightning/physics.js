@@ -33,21 +33,25 @@ const physics = (() => {
         return this.origin.x < point.x && point.x < this.origin.x + this.dims.x && this.origin.y < point.y && point.y < this.origin.y + this.dims.y;
       }
       // other_box is the moving box
+      // TODO: impl is broken
       push_aabb_out(other_box) {
-        const diff = p5.Vector.sub(this.origin, other_box.origin);
-        const p = p5.Vector.add(this.dims, other_box.dims).sub(createVector(Math.abs(diff.x), Math.abs(diff.y)));
+        let diff = createVector();
+        diff.x = this.origin.x + 1/2 * this.dims.x - (other_box.origin.x + 1/2 * other_box.dims.x);
+        diff.y = this.origin.y + 1/2 * this.dims.y - (other_box.origin.y + 1/2 * other_box.dims.y);
+        const p = p5.Vector.add(this.dims, other_box.dims).mult(1/2).sub(createVector(Math.abs(diff.x), Math.abs(diff.y)));
 
         if (p.x <= 0 || p.y <= 0) return null;
         const hit = new physics.Hit();
         if(p.x < p.y) {
-          hit.pos = createVector(this.origin.x + this.dims.x * (diff.x < 0), other_box.origin.y);
+          hit.pos = createVector(other_box.origin.x - p.x, other_box.origin.y);
           hit.normal = createVector(Math.sign(diff.x), 0);
           hit.time = 0;
         } else {
-          hit.pos = createVector(other_box.origin.x, this.origin.y + this.dims.y * (diff.y > 0));
+          hit.pos = createVector(other_box.origin.x, other_box.origin.y - p.y);
           hit.normal = createVector(0, Math.sign(diff.y));
           hit.time = 0;
         }
+        console.log(`gemme out with x: ${other_box.origin.x}, y: ${other_box.origin.y}; pushed to x: ${hit.pos.x}, y: ${hit.pos.y}`);
         return hit;
 
       }
@@ -59,8 +63,8 @@ const physics = (() => {
       intersectSegment(pos, delta) {
         const scaleX = 1.0 / delta.x;
         const scaleY = 1.0 / delta.y;
-        const isNegX = scaleX < 0;
-        const isNegY = scaleY < 0;
+        const isNegX = scaleX <= 0;
+        const isNegY = scaleY <= 0;
         const nearTimeX = (this.origin.x + isNegX * this.dims.x - pos.x) * scaleX;
         const nearTimeY = (this.origin.y + isNegY * this.dims.y - pos.y) * scaleY;
         const farTimeX = (this.origin.x + !isNegX * this.dims.x - pos.x) * scaleX;
@@ -79,6 +83,7 @@ const physics = (() => {
           normal.x = isNegX ? 1 : -1;
           normal.y = 0;
         } else {
+          console.log("bruh");
           normal.x = 0;
           normal.y = isNegY ? 1 : -1;
         }
@@ -105,20 +110,24 @@ const physics = (() => {
       if(thing.aabb === undefined || thing.vel === undefined) return;
 
       let res;
-      for(let i = 0; i < level.w; i++) {
+      outer: for(let i = 0; i < level.w; i++) {
         for(let j = 0; j < level.h; j++) {
           // there's no block so just air, move on
           if(!level.block_array[j * level.w + i]) continue;
           const box = new physics.AABB(createVector(i, j), createVector(1, 1));
           const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
           if(temp_res === null) continue;
+          // if(res !== undefined && temp_res.time === 0 && res.time === 0) {
+          //   thing.vel = createVector(0, 0);
+          //   break outer;
+          // }
           if(res === undefined || temp_res.time < res.time) res = temp_res;
         }
       }
       // didn't collide with any blocks
       if(res === undefined) {
         thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
-        thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
+        console.log("not colliding");
         // if(thing.onGround) {
         //   console.log("changed");
         //   console.log(thing.vel);
@@ -127,9 +136,10 @@ const physics = (() => {
       } else {
         // collided with at least one thing
         thing.aabb.origin = res.pos;
-        if(Math.sign(res.normal.x) === Math.sign(thing.vel.x));
+        if(Math.sign(res.normal.x) === Math.sign(thing.vel.x) && thing.vel.x !== 0) console.log("very wrong");
         if(res.normal.x !== 0) thing.vel.x = 0;
         if(res.normal.y !== 0) {
+          //console.log("here");
           thing.vel.y = 0;
           // if player hits block from top they are grounded and friction is applied
           thing.onGround = true;
@@ -142,6 +152,7 @@ const physics = (() => {
         thing.vel.x -= thing.vel.x * 0.5;
       }
       
+      thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
     }
   };
 })();
