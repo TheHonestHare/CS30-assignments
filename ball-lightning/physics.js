@@ -3,7 +3,7 @@ function between(x, a, b) {
 }
 // Custom clamp function
 function clamp(value, min, max) {
-    return Math.max(min, Math.min(value, max));
+  return Math.max(min, Math.min(value, max));
 }
 
 const physics = (() => {
@@ -43,11 +43,15 @@ const physics = (() => {
         if (p.x <= 0 || p.y <= 0) return null;
         const hit = new physics.Hit();
         if(p.x < p.y) {
-          hit.pos = createVector(other_box.origin.x - p.x, other_box.origin.y);
+          const left_possibility = this.origin.x - other_box.dims.x;
+          const right_possibility = this.origin.x + this.dims.x;
+          hit.pos = createVector(other_box.origin.x - left_possibility < right_possibility - other_box.origin.x ? left_possibility : right_possibility, other_box.origin.y);
           hit.normal = createVector(Math.sign(diff.x), 0);
           hit.time = 0;
         } else {
-          hit.pos = createVector(other_box.origin.x, other_box.origin.y - p.y);
+          const top_possibility = this.origin.y - other_box.dims.y;
+          const bottom_possibility = this.origin.y + this.dims.y;
+          hit.pos = createVector(other_box.origin.x, other_box.origin.y - top_possibility < bottom_possibility - other_box.origin.y ? top_possibility : bottom_possibility);
           hit.normal = createVector(0, Math.sign(diff.y));
           hit.time = 0;
         }
@@ -77,29 +81,27 @@ const physics = (() => {
         if (nearTime >= 1 || farTime <= 0 || isNaN(nearTime) || isNaN(farTime)) {
           return null;
         }
-        const time = clamp(nearTime, 0, 1);
+        if(0 > nearTime && nearTime > 1) return null;
         const normal = createVector();
         if (nearTimeX > nearTimeY) {
           normal.x = isNegX ? 1 : -1;
           normal.y = 0;
         } else {
-          console.log("bruh");
+          console.log(`nearTimeX: ${nearTimeX}, nearTimeY: ${nearTimeY}, delta.x: ${delta.x}, pos.y: ${delta.y}`);
           normal.x = 0;
           normal.y = isNegY ? 1 : -1;
         }
         const coll_pos = createVector();
-        coll_pos.x = pos.x + delta.x * time;
-        coll_pos.y = pos.y + delta.y * time;
-        fill("green");
-        ellipse(coll_pos.x, coll_pos.y, 0.1, 0.1);
-        return new physics.Hit(coll_pos, normal, time);
+        coll_pos.x = pos.x + delta.x * nearTime;
+        coll_pos.y = pos.y + delta.y * nearTime;
+        return new physics.Hit(coll_pos, normal, nearTime);
       }
 
       // adapted from https://noonat.github.io/intersect
       // other_box is the moving box
       sweepAABB(other_box, delta) {
         const new_box = new physics.AABB(this.origin, this.dims, other_box.dims);
-        if(new_box.isPointIn(other_box.origin)) return this.push_aabb_out(other_box);
+        if(new_box.isPointIn(other_box.origin) || delta.x === 0 && delta.y === 0) return this.push_aabb_out(other_box);
 
         const res = new_box.intersectSegment(other_box.origin, delta, other_box.dims);
         return res;
@@ -110,17 +112,13 @@ const physics = (() => {
       if(thing.aabb === undefined || thing.vel === undefined) return;
 
       let res;
-      outer: for(let i = 0; i < level.w; i++) {
+      for(let i = 0; i < level.w; i++) {
         for(let j = 0; j < level.h; j++) {
           // there's no block so just air, move on
           if(!level.block_array[j * level.w + i]) continue;
           const box = new physics.AABB(createVector(i, j), createVector(1, 1));
           const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
           if(temp_res === null) continue;
-          // if(res !== undefined && temp_res.time === 0 && res.time === 0) {
-          //   thing.vel = createVector(0, 0);
-          //   break outer;
-          // }
           if(res === undefined || temp_res.time < res.time) res = temp_res;
         }
       }
@@ -134,6 +132,7 @@ const physics = (() => {
         // }
         thing.onGround = false;
       } else {
+        console.log(`time: ${res.time}`);
         // collided with at least one thing
         thing.aabb.origin = res.pos;
         if(Math.sign(res.normal.x) === Math.sign(thing.vel.x) && thing.vel.x !== 0) console.log("very wrong");

@@ -31,11 +31,11 @@ function setup() {
 function draw() {
   noStroke();
   player.process_input();
+  physics.update_physics(player);
   cam.transform();
   bg.draw();
   level.draw();
   player.draw();
-  physics.update_physics(player);
 }
 
 function mouseWheel(event) {
