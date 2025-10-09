@@ -56,6 +56,7 @@ const physics = (() => {
           hit.time = 0;
         }
         console.log(`gemme out with x: ${other_box.origin.x}, y: ${other_box.origin.y}; pushed to x: ${hit.pos.x}, y: ${hit.pos.y}`);
+        other_box.origin = hit.pos;
         return hit;
 
       }
@@ -69,10 +70,10 @@ const physics = (() => {
         const scaleY = 1.0 / delta.y;
         const isNegX = scaleX <= 0;
         const isNegY = scaleY <= 0;
-        const nearTimeX = (this.origin.x + isNegX * this.dims.x - pos.x) * scaleX;
-        const nearTimeY = (this.origin.y + isNegY * this.dims.y - pos.y) * scaleY;
-        const farTimeX = (this.origin.x + !isNegX * this.dims.x - pos.x) * scaleX;
-        const farTimeY = (this.origin.y + !isNegY * this.dims.y - pos.y) * scaleY;
+        const nearTimeX = delta.x !== 0 ? (this.origin.x + isNegX * this.dims.x - pos.x) * scaleX : Infinity;
+        const nearTimeY = delta.y !== 0 ? (this.origin.y + isNegY * this.dims.y - pos.y) * scaleY : Infinity;
+        const farTimeX = delta.x !== 0 ? (this.origin.x + !isNegX * this.dims.x - pos.x) * scaleX : Infinity;
+        const farTimeY = delta.y !== 0 ?(this.origin.y + !isNegY * this.dims.y - pos.y) * scaleY : Infinity;
         if (nearTimeX > farTimeY || nearTimeY > farTimeX) {
           return null;
         }
@@ -81,7 +82,7 @@ const physics = (() => {
         if (nearTime >= 1 || farTime <= 0 || isNaN(nearTime) || isNaN(farTime)) {
           return null;
         }
-        if(0 > nearTime && nearTime > 1) return null;
+        const time = clamp(nearTime, 0, 1);
         const normal = createVector();
         if (nearTimeX > nearTimeY) {
           normal.x = isNegX ? 1 : -1;
@@ -92,16 +93,20 @@ const physics = (() => {
           normal.y = isNegY ? 1 : -1;
         }
         const coll_pos = createVector();
-        coll_pos.x = pos.x + delta.x * nearTime;
-        coll_pos.y = pos.y + delta.y * nearTime;
-        return new physics.Hit(coll_pos, normal, nearTime);
+        coll_pos.x = pos.x + delta.x * time;
+        coll_pos.y = pos.y + delta.y * time;
+        return new physics.Hit(coll_pos, normal, time);
       }
 
       // adapted from https://noonat.github.io/intersect
       // other_box is the moving box
       sweepAABB(other_box, delta) {
         const new_box = new physics.AABB(this.origin, this.dims, other_box.dims);
-        if(new_box.isPointIn(other_box.origin) || delta.x === 0 && delta.y === 0) return this.push_aabb_out(other_box);
+        if(new_box.isPointIn(other_box.origin) || delta.x === 0 && delta.y === 0) {
+          const res = this.push_aabb_out(other_box);
+          console.log(other_box.origin);
+          return res;
+        }
 
         const res = new_box.intersectSegment(other_box.origin, delta, other_box.dims);
         return res;
@@ -126,19 +131,14 @@ const physics = (() => {
       if(res === undefined) {
         thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
         console.log("not colliding");
-        // if(thing.onGround) {
-        //   console.log("changed");
-        //   console.log(thing.vel);
-        // }
         thing.onGround = false;
       } else {
-        console.log(`time: ${res.time}`);
+        console.log(`time: ${res.time}, curr_pos: ${thing.aabb.origin}`);
         // collided with at least one thing
         thing.aabb.origin = res.pos;
         if(Math.sign(res.normal.x) === Math.sign(thing.vel.x) && thing.vel.x !== 0) console.log("very wrong");
         if(res.normal.x !== 0) thing.vel.x = 0;
         if(res.normal.y !== 0) {
-          //console.log("here");
           thing.vel.y = 0;
           // if player hits block from top they are grounded and friction is applied
           thing.onGround = true;

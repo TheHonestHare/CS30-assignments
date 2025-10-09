@@ -28,7 +28,7 @@ const level_0 = [
   true, false, false, false,
   true, false, false, true,
   true, true, true, true
-]
+];
 const level_manager = {
   "level": 0,
   "load": (n) => {

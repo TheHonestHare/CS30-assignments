@@ -445,7 +445,6 @@ export default [
     rules: {
       indent: ["warn", 2],
       semi: ["warn", "always"],
-      "no-extra-parens": ["warn", "all"],
       eqeqeq: ["warn", "always"],
       "no-floating-decimal": ["warn"],
       "brace-style": ["warn", "1tbs"],
