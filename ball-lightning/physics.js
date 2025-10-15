@@ -112,21 +112,33 @@ const physics = (() => {
         return res;
       }
     },
+    // used to cut down on number of squares we must check for collision
+    findAllGridSquaresSpanned(origin, dims, delta) {
+      const tl = createVector(Math.min(origin.x, origin.x + delta.x), Math.min(origin.y, origin.y + delta.y));
+      const br = createVector(Math.max(origin.x + dims.x, origin.x + delta.x + dims.x), Math.max(origin.y + dims.y, origin.y + delta.y + dims.y));
+
+      let out = [];
+      for(let x = Math.floor(tl.x); x <= Math.floor(br.x); x++) {
+        for(let y = Math.floor(tl.y); y <= Math.floor(br.y); y++) {
+          out.push(createVector(x, y));
+        }
+      }
+      return out;
+    },
     update_physics(thing) {
       // precondition
       if(thing.aabb === undefined || thing.vel === undefined) return;
 
       let res;
-      for(let i = 0; i < level.w; i++) {
-        for(let j = 0; j < level.h; j++) {
-          // there's no block so just air, move on
-          if(!level.block_array[j * level.w + i]) continue;
-          const box = new physics.AABB(createVector(i, j), createVector(1, 1));
-          const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
-          if(temp_res === null) continue;
-          if(res === undefined || temp_res.time < res.time) res = temp_res;
-        }
-      }
+      const spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, p5.Vector.mult(thing.vel, deltaTime / 1000));
+      spanned.forEach((coord) => {
+        if(!between(coord.x, -1, level.w) || !between(coord.y, -1, level.h)) return;
+        if(!level.block_array[coord.y * level.w + coord.x]) return;
+        const box = new physics.AABB(coord, createVector(1, 1));
+        const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
+        if(temp_res === null) return;
+        if(res === undefined || temp_res.time < res.time) res = temp_res; 
+      });
       // didn't collide with any blocks
       if(res === undefined) {
         thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
