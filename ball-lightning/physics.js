@@ -56,7 +56,7 @@ const physics = (() => {
           hit.time = 0;
         }
         console.log(`gemme out with x: ${other_box.origin.x}, y: ${other_box.origin.y}; pushed to x: ${hit.pos.x}, y: ${hit.pos.y}`);
-        other_box.origin = hit.pos;
+        //other_box.origin = hit.pos;
         return hit;
 
       }
@@ -88,7 +88,7 @@ const physics = (() => {
           normal.x = isNegX ? 1 : -1;
           normal.y = 0;
         } else {
-          console.log(`nearTimeX: ${nearTimeX}, nearTimeY: ${nearTimeY}, delta.x: ${delta.x}, pos.y: ${delta.y}`);
+          //console.log(`nearTimeX: ${nearTimeX}, nearTimeY: ${nearTimeY}, delta.x: ${delta.x}, pos.y: ${delta.y}`);
           normal.x = 0;
           normal.y = isNegY ? 1 : -1;
         }
@@ -104,7 +104,7 @@ const physics = (() => {
         const new_box = new physics.AABB(this.origin, this.dims, other_box.dims);
         if(new_box.isPointIn(other_box.origin) || delta.x === 0 && delta.y === 0) {
           const res = this.push_aabb_out(other_box);
-          console.log(other_box.origin);
+          //console.log(other_box.origin);
           return res;
         }
 
@@ -128,24 +128,33 @@ const physics = (() => {
     update_physics(thing) {
       // precondition
       if(thing.aabb === undefined || thing.vel === undefined) return;
+      // if player has been away from game, stop deltaTime from accumulating
+      if(deltaTime > 1/15*1000) return;
 
       let res;
       const spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, p5.Vector.mult(thing.vel, deltaTime / 1000));
-      spanned.forEach((coord) => {
-        if(!between(coord.x, -1, level.w) || !between(coord.y, -1, level.h)) return;
-        if(!level.block_array[coord.y * level.w + coord.x]) return;
+      for(coord of spanned) {
+        if(!between(coord.x, -1, level.w) || !between(coord.y, -1, level.h)) continue;
+        if(!level.block_array[coord.y * level.w + coord.x]) continue;
         const box = new physics.AABB(coord, createVector(1, 1));
         const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
-        if(temp_res === null) return;
-        if(res === undefined || temp_res.time < res.time) res = temp_res; 
-      });
+        if(temp_res === null) continue;
+        if(res === undefined || temp_res.time < res.time) res = temp_res;
+        // TODO: special case corners or figure out whats wrong
+        // if(temp_res.time === 0 && res.time === 0 &&
+        //   (temp_res.normal.x !== 0 && res.normal.y !== 0) ||
+        //   (temp_res.normal.y !== 0 && res.normal.x !== 0))
+        // {
+        //   thing.vel.x = 0;
+        //   thing.vel.y = 0;
+        //   return;
+        // }
+      };
       // didn't collide with any blocks
       if(res === undefined) {
         thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
-        console.log("not colliding");
         thing.onGround = false;
       } else {
-        console.log(`time: ${res.time}, curr_pos: ${thing.aabb.origin}`);
         // collided with at least one thing
         thing.aabb.origin = res.pos;
         if(Math.sign(res.normal.x) === Math.sign(thing.vel.x) && thing.vel.x !== 0) console.log("very wrong");
@@ -155,8 +164,29 @@ const physics = (() => {
           // if player hits block from top they are grounded and friction is applied
           thing.onGround = true;
         }
-        // TODO: we need to do a second collision check to make sure they didn't hit another wall
-        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000 * (1-res.time)));
+
+        // second collision check for sliding
+        const new_delta = p5.Vector.mult(thing.vel, deltaTime / 1000 * (1-res.time));
+        const new_spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, new_delta);
+        let second_res;
+        new_spanned.forEach((coord) => {
+          if(!between(coord.x, -1, level.w) || !between(coord.y, -1, level.h)) return;
+          if(!level.block_array[coord.y * level.w + coord.x]) return;
+          const box = new physics.AABB(coord, createVector(1, 1));
+          const temp_res = box.sweepAABB(thing.aabb, new_delta);   
+          if(temp_res === null) return;
+          if(second_res === undefined || temp_res.time < second_res.time) second_res = temp_res;
+        });
+        // didn't collide with any blocks
+        if(second_res === undefined) {
+          thing.aabb.origin.add(new_delta);
+        } else {
+          
+          // collided with at least one thing
+          thing.aabb.origin = second_res.pos;
+          thing.vel.x = 0;
+          thing.vel.y = 0;
+        }
       }
       // apply friction
       if(thing.onGround) {

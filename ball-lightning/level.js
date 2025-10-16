@@ -24,17 +24,17 @@ class Level {
 }
 
 const level_0 = [
-  true, false, false, false,
-  true, false, false, false,
-  true, false, false, true,
-  true, true, true, true
+  false, false, false, false, false, false, false,
+  false, false, false, false, false, false, false,
+  true, false, false, true, false, false, true,
+  true, true, true, true, true, true, true
 ];
 const level_manager = {
   "level": 0,
   "load": (n) => {
     switch(n) {
       case 0: {
-        return new Level(level_0, 4, 4, 1, -1);
+        return new Level(level_0, 7, 4, 1, -1);
       }
     }
   }
