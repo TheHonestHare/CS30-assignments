@@ -30,7 +30,7 @@ const physics = (() => {
         }
       }
       pointIn(point) {
-        return this.origin.x < point.x && point.x < this.origin.x + this.dims.x && this.origin.y < point.y && point.y < this.origin.y + this.dims.y;
+        return this.origin.x <= point.x && point.x <= this.origin.x + this.dims.x && this.origin.y <= point.y && point.y <= this.origin.y + this.dims.y;
       }
       // other_box is the moving box
       // TODO: impl is broken
@@ -84,6 +84,7 @@ const physics = (() => {
         }
         const time = clamp(nearTime, 0, 1);
         const normal = createVector();
+        if(nearTimeX === nearTimeY) return null;
         if (nearTimeX > nearTimeY) {
           normal.x = isNegX ? 1 : -1;
           normal.y = 0;
@@ -130,6 +131,7 @@ const physics = (() => {
       if(thing.aabb === undefined || thing.vel === undefined) return;
       // if player has been away from game, stop deltaTime from accumulating
       if(deltaTime > 1/15*1000) return;
+      thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
 
       let res;
       const spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, p5.Vector.mult(thing.vel, deltaTime / 1000));
@@ -192,8 +194,6 @@ const physics = (() => {
       if(thing.onGround) {
         thing.vel.x -= thing.vel.x * 0.5;
       }
-      
-      thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
     }
   };
 })();
