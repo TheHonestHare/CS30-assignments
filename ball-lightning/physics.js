@@ -66,14 +66,19 @@ const physics = (() => {
       }
       // adapted from https://noonat.github.io/intersect
       intersectSegment(pos, delta) {
+        this.draw();
         const scaleX = 1.0 / delta.x;
         const scaleY = 1.0 / delta.y;
         const isNegX = scaleX <= 0;
         const isNegY = scaleY <= 0;
-        const nearTimeX = delta.x !== 0 ? (this.origin.x + isNegX * this.dims.x - pos.x) * scaleX : Infinity;
-        const nearTimeY = delta.y !== 0 ? (this.origin.y + isNegY * this.dims.y - pos.y) * scaleY : Infinity;
-        const farTimeX = delta.x !== 0 ? (this.origin.x + !isNegX * this.dims.x - pos.x) * scaleX : Infinity;
-        const farTimeY = delta.y !== 0 ?(this.origin.y + !isNegY * this.dims.y - pos.y) * scaleY : Infinity;
+
+        let nearTimeX = delta.x !== 0 ? (this.origin.x + isNegX * this.dims.x - pos.x) * scaleX : 0;
+        let nearTimeY = delta.y !== 0 ? (this.origin.y + isNegY * this.dims.y - pos.y) * scaleY : 0;
+        let farTimeX = delta.x !== 0 ? (this.origin.x + !isNegX * this.dims.x - pos.x) * scaleX : Infinity;
+        let farTimeY = delta.y !== 0 ?(this.origin.y + !isNegY * this.dims.y - pos.y) * scaleY : Infinity;
+
+        if(pos.x === this.origin.x && delta.x === 0) return null;
+        if(pos.y === this.origin.y && delta.y === 0) return null;
         if (nearTimeX > farTimeY || nearTimeY > farTimeX) {
           return null;
         }
@@ -84,12 +89,10 @@ const physics = (() => {
         }
         const time = clamp(nearTime, 0, 1);
         const normal = createVector();
-        if(nearTimeX === nearTimeY) return null;
         if (nearTimeX > nearTimeY) {
           normal.x = isNegX ? 1 : -1;
           normal.y = 0;
         } else {
-          //console.log(`nearTimeX: ${nearTimeX}, nearTimeY: ${nearTimeY}, delta.x: ${delta.x}, pos.y: ${delta.y}`);
           normal.x = 0;
           normal.y = isNegY ? 1 : -1;
         }
@@ -142,15 +145,6 @@ const physics = (() => {
         const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
         if(temp_res === null) continue;
         if(res === undefined || temp_res.time < res.time) res = temp_res;
-        // TODO: special case corners or figure out whats wrong
-        // if(temp_res.time === 0 && res.time === 0 &&
-        //   (temp_res.normal.x !== 0 && res.normal.y !== 0) ||
-        //   (temp_res.normal.y !== 0 && res.normal.x !== 0))
-        // {
-        //   thing.vel.x = 0;
-        //   thing.vel.y = 0;
-        //   return;
-        // }
       };
       // didn't collide with any blocks
       if(res === undefined) {
@@ -183,7 +177,6 @@ const physics = (() => {
         if(second_res === undefined) {
           thing.aabb.origin.add(new_delta);
         } else {
-          
           // collided with at least one thing
           thing.aabb.origin = second_res.pos;
           thing.vel.x = 0;
