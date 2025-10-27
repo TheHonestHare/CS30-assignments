@@ -35,6 +35,11 @@ function draw() {
   bg.draw();
   level.draw();
   player.draw();
+  mouse.highlight_grid_pos();
+}
+
+function mousePressed() {
+  mouse.onLeftClick();
 }
 
 function mouseWheel(event) {

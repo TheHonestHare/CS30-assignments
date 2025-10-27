@@ -4,22 +4,29 @@ class Level {
     this.block_array = [...block_array];
     this.w = w;
     this.h = h;
-    let img = createGraphics(w * 8, h * 8);
-    for(let i = 0; i < w; i++) {
-      for(let j = 0; j < h; j++) {
-        if(block_array[j * w + i]) {
-        
+    this.spawnPos = createVector(spawnx, spawny);
+    this.createLevelImage();
+  }
+  draw() {
+    noSmooth();
+    image(this.img, 0, 0, this.w, this.h);
+    smooth();
+  }
+  createLevelImage() {
+    let img = createGraphics(this.w * 8, this.h * 8);
+    for(let i = 0; i < this.w; i++) {
+      for(let j = 0; j < this.h; j++) {
+        if(this.block_array[j * this.w + i]) {      
           img.image(wood_img, i * 8, j * 8, 8, 8);
         }
       }
     }
-    this.image = img;
-    this.spawnPos = createVector(spawnx, spawny);
+    this.img = img;
   }
-  draw() {
-    noSmooth();
-    image(this.image, 0, 0, this.w, this.h);
-    smooth();
+  setBlock(x, y, val) {
+    if(!between(x, -1, level.w) || !between(y, -1, level.h)) return;
+    level.block_array[y * level.w + x] = true;
+    level.createLevelImage();
   }
 }
 

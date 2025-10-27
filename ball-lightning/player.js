@@ -2,6 +2,8 @@ class Player {
   constructor(x, y) {
     this.JUMP_HEIGHT = 10;
     this.TIME_TO_JUMP_APEX = 0.5;
+    this.APEX_HANG_MODIFIER = 0.2;
+    this.APEX_THRESHOLD = 0.4;
     
     this.aabb = new physics.AABB(createVector(x, y), createVector(2, 2));
     this.vel = createVector(0, 1);
@@ -26,9 +28,10 @@ class Player {
   // code derived from Sebastian Lague https://www.youtube.com/watch?v=PlT44xr0iW0
   applyGravity(deltaT) {
     const GRAVITY_EARLY_JUMP_END_MODIFIER = 3;
-
-    const gravity = 2 * this.JUMP_HEIGHT / (this.TIME_TO_JUMP_APEX * this.TIME_TO_JUMP_APEX) * (!this.executingJump && this.vel.y < 0 ? GRAVITY_EARLY_JUMP_END_MODIFIER : 1);
+    const is_at_apex = Math.abs(this.vel.y) < this.APEX_THRESHOLD;
+    const gravity = 2 * this.JUMP_HEIGHT / (this.TIME_TO_JUMP_APEX * this.TIME_TO_JUMP_APEX) * (is_at_apex ? this.APEX_HANG_MODIFIER : 1);
     this.vel.add(createVector(0, gravity).mult(deltaT)); 
+    if(!this.executingJump && this.vel.y < 0) this.vel.y *= 0.30;
   }
 
   jump() {
