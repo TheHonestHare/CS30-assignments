@@ -23,18 +23,21 @@ class Level {
   }
 }
 
-const level_0 = [
-  false, false, false, false, false, false, false,
-  false, false, false, false, false, false, false,
-  true, false, false, true, false, false, true,
-  true, true, true, true, true, true, true
-];
+const level_0 = (() => {
+  let res = [];
+  for(let y = 0; y < 30; y++) {
+    for(let x = 0; x < 100; x++) {
+      res.push((Math.sin(x / 10) * 3 - 10) + y > 0);
+    }
+  }
+  return res;
+})();
 const level_manager = {
   "level": 0,
   "load": (n) => {
     switch(n) {
       case 0: {
-        return new Level(level_0, 7, 4, 1, -1);
+        return new Level(level_0, 100, 30, 1, -1);
       }
     }
   }

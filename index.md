@@ -9,4 +9,4 @@
 - [Terrain generation](terrain-gen)
 
 ## Assignments
-[Interactive scene](ball-lightning)
+[Objects and Arrays](ball-lightning)

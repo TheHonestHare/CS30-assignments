@@ -6,6 +6,18 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(value, max));
 }
 
+// based off of the unity implementation https://docs.unity3d.com/ScriptReference/Mathf.SmoothDamp.html
+// returns { pos, newVel }
+function smoothDamp(from, to, initVel, smoothTime, deltaT) {
+  const omega = 2 / smoothTime;
+  const exp = Math.exp(omega * deltaT);
+  const change = to - from;
+  const temp = (initVel + omega * change) * deltaT;
+  const newVel = (vel - omega * temp) * exp;
+  const newPos = to + (change + temp) * exp;
+  return [newPos, newVel];
+}
+
 const physics = (() => {
   return {
     Hit: class {
@@ -129,40 +141,51 @@ const physics = (() => {
       }
       return out;
     },
-    update_physics(thing) {
+    test_on_ground(thing) {
+      if(thing.aabb === undefined || thing.vel === undefined) return false;
+
+      // if distance to a vertical edge is too big we're obviously not on the ground
+      const y_pos = thing.aabb.origin.y + thing.aabb.dims.y;
+      const mantissa = y_pos % 1;
+      if(mantissa > Number.EPSILON) return false;
+      
+      // check each block under to see if there is one there
+      const y = Math.ceil(y_pos);
+      if(!between(y, -1, level.h)) return false;
+      for(let x = Math.floor(thing.aabb.origin.x); x <= Math.ceil(thing.aabb.origin.x + thing.aabb.dims.x); x++) {
+        if(!between(x, -1, level.w)) continue;
+        if(level.block_array[y * level.w + x]) return true;
+      }
+      return false;
+    },
+    do_collisions(thing, deltaT) {
       // precondition
       if(thing.aabb === undefined || thing.vel === undefined) return;
       // if player has been away from game, stop deltaTime from accumulating
       if(deltaTime > 1/15*1000) return;
-      thing.vel.add(createVector(0, 9.8).mult(deltaTime / 1000));
 
       let res;
-      const spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, p5.Vector.mult(thing.vel, deltaTime / 1000));
+      const spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, p5.Vector.mult(thing.vel, deltaT));
       for(coord of spanned) {
         if(!between(coord.x, -1, level.w) || !between(coord.y, -1, level.h)) continue;
         if(!level.block_array[coord.y * level.w + coord.x]) continue;
         const box = new physics.AABB(coord, createVector(1, 1));
-        const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaTime / 1000));   
+        const temp_res = box.sweepAABB(thing.aabb, p5.Vector.mult(thing.vel, deltaT));   
         if(temp_res === null) continue;
         if(res === undefined || temp_res.time < res.time) res = temp_res;
       };
       // didn't collide with any blocks
       if(res === undefined) {
-        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaTime / 1000));
-        thing.onGround = false;
+        thing.aabb.origin.add(p5.Vector.mult(thing.vel, deltaT));
       } else {
         // collided with at least one thing
         thing.aabb.origin = res.pos;
         if(Math.sign(res.normal.x) === Math.sign(thing.vel.x) && thing.vel.x !== 0) console.log("very wrong");
         if(res.normal.x !== 0) thing.vel.x = 0;
-        if(res.normal.y !== 0) {
-          thing.vel.y = 0;
-          // if player hits block from top they are grounded and friction is applied
-          thing.onGround = true;
-        }
+        if(res.normal.y !== 0) thing.vel.y = 0;
 
         // second collision check for sliding
-        const new_delta = p5.Vector.mult(thing.vel, deltaTime / 1000 * (1-res.time));
+        const new_delta = p5.Vector.mult(thing.vel, deltaT * (1-res.time));
         const new_spanned = physics.findAllGridSquaresSpanned(thing.aabb.origin, thing.aabb.dims, new_delta);
         let second_res;
         new_spanned.forEach((coord) => {
@@ -183,10 +206,7 @@ const physics = (() => {
           thing.vel.y = 0;
         }
       }
-      // apply friction
-      if(thing.onGround) {
-        thing.vel.x -= thing.vel.x * 0.5;
-      }
+      thing.onGround = physics.test_on_ground(thing);
     }
   };
 })();

@@ -1,27 +1,62 @@
 class Player {
   constructor(x, y) {
-    this.aabb = new physics.AABB(createVector(x, y), createVector(1, 1));
+    this.JUMP_HEIGHT = 10;
+    this.TIME_TO_JUMP_APEX = 0.5;
+    
+    this.aabb = new physics.AABB(createVector(x, y), createVector(2, 2));
     this.vel = createVector(0, 1);
+    this.accel = createVector(0, 16);
+    this.maxSpeed = createVector(10, 30);
+
+    this.keys = {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+    };
     this.onGround = false;
+    this.executingJump = false;
   }
   draw() {
     fill("yellow");
     player.aabb.draw();
     image(player_img, this.aabb.origin.x, this.aabb.origin.y, this.aabb.dims.x, this.aabb.dims.y);
   }
+
+  // code derived from Sebastian Lague https://www.youtube.com/watch?v=PlT44xr0iW0
+  applyGravity(deltaT) {
+    const GRAVITY_EARLY_JUMP_END_MODIFIER = 3;
+
+    const gravity = 2 * this.JUMP_HEIGHT / (this.TIME_TO_JUMP_APEX * this.TIME_TO_JUMP_APEX) * (!this.executingJump && this.vel.y < 0 ? GRAVITY_EARLY_JUMP_END_MODIFIER : 1);
+    this.vel.add(createVector(0, gravity).mult(deltaT)); 
+  }
+
+  jump() {
+    this.executingJump = true;
+    this.vel.y = -2 * this.JUMP_HEIGHT / this.TIME_TO_JUMP_APEX;
+    console.log("jump");
+  }
+
+  physics_tick(deltaT) {
+    if(this.executingJump && !this.keys.up) this.executingJump = false;
+    if(this.keys.up && this.onGround && !this.executingJump) this.jump();
+    if(this.keys.left === this.keys.right) {
+      this.vel.x = 0;
+    } else {
+      this.vel.x = 10 * (this.keys.right ? 1 : -1);
+    }
+    
+    this.applyGravity(deltaT);
+    physics.do_collisions(player, deltaT);
+  }
+  
   process_input() {
-    if(keyIsDown("W".charCodeAt(0))) {
-      this.vel.y = -4;
-    } else if(this.vel.y < 0 && !this.isGrounded) {
-      // different acceleration value when player still going up or else controls feel bad
-      this.vel.y += 10 * deltaTime / 1000;
-    }
-    if(keyIsDown("A".charCodeAt(0))) {
-      this.vel.x = -3;
-    }
-    if(keyIsDown("D".charCodeAt(0))) {
-      this.vel.x = 3;
-    }
+    this.keys.up = keyIsDown("W".charCodeAt(0));
+
+    this.keys.down = keyIsDown("S".charCodeAt(0));
+    this.keys.left = keyIsDown("A".charCodeAt(0));
+    this.keys.right = keyIsDown("D".charCodeAt(0));
+
     if(keyIsDown(" ".charCodeAt(0))) {
       console.log(`x: ${this.aabb.origin.x}, y: ${this.aabb.origin.y}, vel.x: ${this.vel.x}, vel.y: ${this.vel.y}`);
     }

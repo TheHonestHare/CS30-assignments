@@ -1,14 +1,13 @@
 /*
 Dracen Lim
 Computer Science 30
-Interactive Scene
+Arrays and Objects Notation Assignment
 
-Hold w to prevent mario from hitting the ground
-Most of this project is just me setting up stuff for a real 2d engine
-A nested loop is used in level.js to create the level. Right now this is just a long floor but this could be 
-easily configured to be any 2d grid and this would create an image to draw it
-The mouse wheel can be used to zoom in and out of the scene, showcasing the fact that I have implemented a camera system for this
-I have also split this project into multiple files and used (what I think is) idiomatic js patterns to have namespaces
+2d platformer controls with placeholder assets
+A 2d world is "generated" in level.js under level_0 using arrays
+The Player class (player.js) keeps track of the keys using an object and initializes them using object notation
+My extra for experts is managing to implement working 2d sliding physics so that it is impossible for 2 objects to phase through each other even at high speeds (physics.js)
+This is a continuation of the first assignment
 */
 
 let level;
@@ -31,7 +30,7 @@ function setup() {
 function draw() {
   noStroke();
   player.process_input();
-  physics.update_physics(player);
+  player.physics_tick(deltaTime / 1000);
   cam.transform();
   bg.draw();
   level.draw();
