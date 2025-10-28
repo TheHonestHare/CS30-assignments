@@ -7,6 +7,7 @@
 - [Perlin noise mover](perlin-noise)
 - [Perlin bubbles](perlin-bubbles)
 - [Terrain generation](terrain-gen)
+- [Neighboring cells](cell-neightbors)
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
