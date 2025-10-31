@@ -8,6 +8,7 @@
 - [Perlin bubbles](perlin-bubbles)
 - [Terrain generation](terrain-gen)
 - [Neighboring cells](cell-neightbors)
+- [Player in grid](player-in-grid)
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
