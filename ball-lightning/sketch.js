@@ -11,14 +11,14 @@ This is a continuation of the first assignment
 */
 
 let level;
-let wood_img;
-let player_img;
 let player;
 
+let blockSpriteSheet;
+let blockSprites = [];
+
 function preload() {
-  wood_img = loadImage('./wood.png');
-  player_img = loadImage('./blah.png');
-  
+  blockSpriteSheet = new material.SpriteSheet("blocks.png");
+  blockSprites.push(new material.Sprite(blockSpriteSheet, 0, 0, 8, 8));
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);

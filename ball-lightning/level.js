@@ -16,9 +16,9 @@ class Level {
     let img = createGraphics(this.w * 8, this.h * 8);
     for(let i = 0; i < this.w; i++) {
       for(let j = 0; j < this.h; j++) {
-        if(this.block_array[j * this.w + i]) {      
-          img.image(wood_img, i * 8, j * 8, 8, 8);
-        }
+        const block_mat = this.block_array[j * this.w + i];
+        if(block_mat === 0) continue;   
+        blockSprites[block_mat-1].draw(img, i * 8, j * 8);
       }
     }
     this.img = img;
@@ -34,7 +34,7 @@ const level_0 = (() => {
   let res = [];
   for(let y = 0; y < 30; y++) {
     for(let x = 0; x < 100; x++) {
-      res.push((Math.sin(x / 10) * 3 - 10) + y > 0);
+      res.push((Math.sin(x / 10) * 3 - 10) + y > 0 ? 1 : 0);
     }
   }
   return res;

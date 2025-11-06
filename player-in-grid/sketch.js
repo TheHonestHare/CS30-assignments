@@ -19,6 +19,11 @@ let player = {
   colour: 'green',
 };
 
+let dirt_img;
+
+function preload() {
+  dirt_img = loadImage("dirt 1.png");
+}
 
 function setup() {
   createCanvas(windowWidth * 0.9, windowHeight * 0.9);
@@ -43,7 +48,7 @@ function displayGrid() {
     for(let y = 0; y < rows; y++) {
       const colour = grid[x][y] === BLANK ? 'white' : grid[x][y] === WALL ? 'black' : player.colour;
       fill(colour);
-      rect(x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      image(dirt_img, x*CELL_SIZE, y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
     }
   }
 }
