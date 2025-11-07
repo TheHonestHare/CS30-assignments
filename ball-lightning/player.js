@@ -1,5 +1,5 @@
 class Player {
-  constructor(x, y) {
+  constructor(x, y, sprite) {
     this.JUMP_HEIGHT = 10;
     this.TIME_TO_JUMP_APEX = 0.5;
     this.APEX_HANG_MODIFIER = 0.2;
@@ -18,11 +18,13 @@ class Player {
     };
     this.onGround = false;
     this.executingJump = false;
+
+    this.sprite = sprite;
   }
   draw() {
     fill("yellow");
     player.aabb.draw();
-    image(player_img, this.aabb.origin.x, this.aabb.origin.y, this.aabb.dims.x, this.aabb.dims.y);
+    this.sprite.draw();
   }
 
   // code derived from Sebastian Lague https://www.youtube.com/watch?v=PlT44xr0iW0

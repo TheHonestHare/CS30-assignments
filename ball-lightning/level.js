@@ -18,7 +18,7 @@ class Level {
       for(let j = 0; j < this.h; j++) {
         const block_mat = this.block_array[j * this.w + i];
         if(block_mat === 0) continue;   
-        blockSprites[block_mat-1].draw(img, i * 8, j * 8);
+        blockSprites[block_mat-1].draw_to_dest(img, i * 8, j * 8);
       }
     }
     this.img = img;

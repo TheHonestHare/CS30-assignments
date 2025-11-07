@@ -16,13 +16,19 @@ let player;
 let blockSpriteSheet;
 let blockSprites = [];
 
+let miscSpriteSheet;
+let playerSprite;
+
 function preload() {
   blockSpriteSheet = new material.SpriteSheet("blocks.png");
   blockSprites.push(new material.Sprite(blockSpriteSheet, 0, 0, 8, 8));
+
+  miscSpriteSheet = new material.SpriteSheet("misc.png");
+  playerSprite = new material.Sprite(miscSpriteSheet, 0, 0, 8, 8);
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  player = new Player(4, -4);
+  player = new Player(4, -4, playerSprite);
   level = level_manager.load(0);
   cam.calculateCameraStartPos(level.spawnPos, level.w, level.h);
 }
