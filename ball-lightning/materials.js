@@ -6,20 +6,24 @@ const material = (() => {
       }
     },
     Sprite: class {
-      constructor(sprite_sheet, sprite_sheet_x, sprite_sheet_y, width, height, scale = 1) {
+      constructor(sprite_sheet, sprite_sheet_x, sprite_sheet_y, sprite_width, sprite_height) {
         this.sprite_sheet = sprite_sheet;
         this.sprite_pos_x = sprite_sheet_x;
         this.sprite_pos_y = sprite_sheet_y;
-        this.w = width;
-        this.h = height;
-        this.scale = scale;
+        this.w = sprite_width;
+        this.h = sprite_height;
       }
-      draw_to_dest(dest, x, y) {
-        dest.image(this.sprite_sheet.image, x, y, this.w * this.scale, this.h * this.scale, this.sprite_pos_x, this.sprite_pos_y);
+      draw_to_dest(dest, x, y, width, height, opacity=255) {
+        dest.tint(255, opacity);
+        dest.image(this.sprite_sheet.image, x, y, width, height, this.sprite_pos_x, this.sprite_pos_y, this.w, this.h);
+        dest.tint(255, 255);
       }
-      draw(dest, x, y) {
-        image(this.sprite_sheet.image, x, y, this.w * this.scale, this.h * this.scale, this.sprite_pos_x, this.sprite_pos_y);
+      draw(x, y, width, height, opacity=255) {
+        tint(255, opacity);
+        image(this.sprite_sheet.image, x, y, width, height, this.sprite_pos_x, this.sprite_pos_y, this.w, this.h);
+        tint(255, 255);
       }
     },
+    
   };
 })();

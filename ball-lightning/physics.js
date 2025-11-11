@@ -29,6 +29,7 @@ const physics = (() => {
     },
     AABB: class {
       draw() {
+        noStroke();
         rect(this.origin.x, this.origin.y, this.dims.x, this.dims.y);
       }
       // padding is applied to top and left sides
@@ -40,6 +41,18 @@ const physics = (() => {
           this.origin = p5.Vector.sub(box_origin, padding);
           this.dims = p5.Vector.add(box_dims, padding);
         }
+      }
+      
+      // WARNING: will include padding
+      get_centre() {
+        return p5.Vector.add(this.origin, p5.Vector.mult(this.dims, 0.5));
+      }
+      set_centre(centre) {
+        this.origin.x = centre.x - this.dims.x / 2;
+        this.origin.y = centre.y - this.dims.y / 2;
+      }
+      is_overlapping_aabb(aabb) {
+        return (new physics.AABB(this.origin, this.dims, aabb.dims)).isPointIn(aabb.origin);
       }
       pointIn(point) {
         return this.origin.x <= point.x && point.x <= this.origin.x + this.dims.x && this.origin.y <= point.y && point.y <= this.origin.y + this.dims.y;

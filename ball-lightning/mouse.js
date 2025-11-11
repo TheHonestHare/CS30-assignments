@@ -6,14 +6,6 @@ const mouse = (() => {
       const mousePosFloorY = floor((mouseY - cam.pos.y) / (cam.zoom * 8));
       return [mousePosFloorX, mousePosFloorY];
     },
-    highlight_grid_pos() {
-      [x, y] = mouse.get_mouse_grid_pos();
-      if(!between(x, -1, level.w) || !between(y, -1, level.h)) return;
-      fill(0, 0, 0, 0);
-      stroke('red');
-      strokeWeight((sin(millis()/250)+1.5)*0.1);
-      rect(x, y, 1, 1);
-    },
     onLeftClick() {
       [x, y] = mouse.get_mouse_grid_pos();
       level.setBlock(x, y, true);

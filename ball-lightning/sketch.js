@@ -21,10 +21,12 @@ let playerSprite;
 
 function preload() {
   blockSpriteSheet = new material.SpriteSheet("blocks.png");
-  blockSprites.push(new material.Sprite(blockSpriteSheet, 0, 0, 8, 8));
+  blockSprites.push(new material.Sprite(blockSpriteSheet, 0, 0, 64, 64));
 
   miscSpriteSheet = new material.SpriteSheet("misc.png");
   playerSprite = new material.Sprite(miscSpriteSheet, 0, 0, 8, 8);
+
+  abilities.preload();
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -35,17 +37,31 @@ function setup() {
 
 function draw() {
   noStroke();
+  noSmooth();
   player.process_input();
   player.physics_tick(deltaTime / 1000);
+  abilities.physics_tick(deltaTime / 1000);
   cam.transform();
   bg.draw();
   level.draw();
   player.draw();
-  mouse.highlight_grid_pos();
+  abilities.placer.highlight_grid_pos();
+  abilities.draw();
 }
 
+function keyPressed() {
+  if(key === 'k') {
+    if(abilities.placer.active) {
+      abilities.placer.exit();
+    } else {
+      abilities.placer.enter();
+    }
+  }
+  if(key === 'j') abilities.activate();
+
+}
 function mousePressed() {
-  mouse.onLeftClick();
+  abilities.placer.onLeftClick();
 }
 
 function mouseWheel(event) {

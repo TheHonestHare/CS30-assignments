@@ -4,6 +4,7 @@ class Player {
     this.TIME_TO_JUMP_APEX = 0.5;
     this.APEX_HANG_MODIFIER = 0.2;
     this.APEX_THRESHOLD = 0.4;
+    this.HORIZONTAL_SPEED = 10;
     
     this.aabb = new physics.AABB(createVector(x, y), createVector(2, 2));
     this.vel = createVector(0, 1);
@@ -19,12 +20,15 @@ class Player {
     this.onGround = false;
     this.executingJump = false;
 
+    // abilities will temporarily set this to make their custom effects
+    this.physics_tick = Player.default_physics_tick;
+    this.draw = Player.default_draw;
+
     this.sprite = sprite;
   }
-  draw() {
-    fill("yellow");
-    player.aabb.draw();
-    this.sprite.draw();
+  static default_draw() {
+    noSmooth();
+    this.sprite.draw(this.aabb.origin.x, this.aabb.origin.y, this.aabb.dims.x, this.aabb.dims.y);
   }
 
   // code derived from Sebastian Lague https://www.youtube.com/watch?v=PlT44xr0iW0
@@ -42,13 +46,13 @@ class Player {
     console.log("jump");
   }
 
-  physics_tick(deltaT) {
+  static default_physics_tick(deltaT) {
     if(this.executingJump && !this.keys.up) this.executingJump = false;
     if(this.keys.up && this.onGround && !this.executingJump) this.jump();
     if(this.keys.left === this.keys.right) {
       this.vel.x = 0;
     } else {
-      this.vel.x = 10 * (this.keys.right ? 1 : -1);
+      this.vel.x = this.HORIZONTAL_SPEED * (this.keys.right ? 1 : -1);
     }
     
     this.applyGravity(deltaT);
