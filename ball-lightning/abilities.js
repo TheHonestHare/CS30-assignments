@@ -70,8 +70,7 @@ const abilities = (() => {
       if(this.index === null) {
         if(this.placed_array.length === 0) return;
         this.index = 0;
-        this.placed_array[this.index].activate();
-        this.current_ability_still_running = true;
+        this.current_ability_still_running = this.placed_array[this.index].activate();
         return;
       }
       if(this.index >= this.placed_array.length-1) {
@@ -80,8 +79,7 @@ const abilities = (() => {
       }
       if(this.current_ability_still_running) this.placed_array[this.index].deactivate();
       this.index += 1;
-      this.placed_array[this.index].activate();
-      this.current_ability_still_running = true;
+      this.current_ability_still_running = this.placed_array[this.index].activate();
     },
 
     physics_tick(deltaT) {
