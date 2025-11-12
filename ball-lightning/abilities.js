@@ -10,7 +10,7 @@ const abilities = (() => {
       ICON: 3,
     },
     placer: {
-      active: true,
+      active: false,
       selected_ability: undefined,
 
       highlight_grid_pos() {
@@ -91,10 +91,11 @@ const abilities = (() => {
     },
     // TODO: make this some sort of parent class
     // each ability type should have the following functions:
-    // activate() 
+    // activate() bool     (returns false if ability failed to activate)
     // draw(state)
+    // static preload()
     // physics_tick(deltaT) bool   (returns true if the ability is still going)
-    // try_to_place(click_pos) ?Ability
+    // static try_to_place(click_pos) ?Ability
     // would_click_remove(click_pos) bool
     
     Dash: class {
@@ -125,7 +126,7 @@ const abilities = (() => {
         return click_grid_pos.x === this.x && click_grid_pos.y === this.y;
       }
       activate() {
-        if(!this.activate_box.is_overlapping_aabb(player.aabb)) return;
+        if(!this.activate_box.is_overlapping_aabb(player.aabb)) return false;
 
         console.log("player is dashing");
 
@@ -136,6 +137,7 @@ const abilities = (() => {
         player.vel = createVector(0, 0);
         player.physics_tick = abilities.Dash.player_physics_tick(this);
         player.draw = abilities.Dash.player_draw(this);
+        return true;
       }
       deactivate() {
         console.log("player finished dashing");
@@ -175,9 +177,6 @@ const abilities = (() => {
             context.has_snapped_pos = true;
           }
           const completion_delta_t = ability_duration >= abilities.Dash.total_dash_length ? -(ability_duration - abilities.Dash.total_dash_length - deltaT) : deltaT;
-          
-
-          console.log(completion_delta_t);
 
           physics.do_collisions(player, completion_delta_t);
 

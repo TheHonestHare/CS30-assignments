@@ -26,6 +26,8 @@ function preload() {
   miscSpriteSheet = new material.SpriteSheet("misc.png");
   playerSprite = new material.Sprite(miscSpriteSheet, 0, 0, 8, 8);
 
+  SceneItems.preload();
+
   abilities.preload();
 }
 function setup() {
@@ -52,9 +54,9 @@ function draw() {
 function keyPressed() {
   if(key === 'k') {
     if(abilities.placer.active) {
-      abilities.placer.exit();
+      abilities.placed_array = [];
     } else {
-      abilities.placer.enter();
+      abilities.index = null;
     }
   }
   if(key === 'j') abilities.activate();

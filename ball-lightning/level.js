@@ -1,15 +1,28 @@
 class Level {
-  constructor(block_array, w, h, spawnx, spawny) {
+  constructor(block_array, w, h, spawnx, spawny, scene_items) {
     // deep copy array
     this.block_array = [...block_array];
     this.w = w;
     this.h = h;
     this.spawnPos = createVector(spawnx, spawny);
+
+
+    this.scene_items = [];
+    scene_items.forEach((val) => {
+      this.scene_items.push(SceneItems.processEntry(val));
+    })
     this.createLevelImage();
+  }
+  static fromObject(obj) {
+    return new Level(obj.block_array, obj.w, obj.h, obj.spawnx, obj.spawny, obj.scene_items)
   }
   draw() {
     noSmooth();
     image(this.img, 0, 0, this.w, this.h);
+    this.scene_items.forEach((val) => {
+      val.tick();
+      val.draw();
+    })
   }
   createLevelImage() {
     let img = createGraphics(this.w * 8, this.h * 8);
@@ -28,22 +41,12 @@ class Level {
     level.createLevelImage();
   }
 }
-
-const level_0 = (() => {
-  let res = [];
-  for(let y = 0; y < 30; y++) {
-    for(let x = 0; x < 100; x++) {
-      res.push((Math.sin(x / 10) * 3 - 10) + y > 0 ? 1 : 0);
-    }
-  }
-  return res;
-})();
 const level_manager = {
   "level": 0,
   "load": (n) => {
     switch(n) {
       case 0: {
-        return new Level(level_0, 100, 30, 1, -1);
+        return Level.fromObject(level0);
       }
     }
   }
