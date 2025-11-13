@@ -29,7 +29,7 @@ class Level {
     for(let i = 0; i < this.w; i++) {
       for(let j = 0; j < this.h; j++) {
         const block_mat = this.block_array[j * this.w + i];
-        if(block_mat === 0) continue;   
+        if(block_mat === blockEnum.AIR) continue;   
         blockSprites[block_mat-1].draw_to_dest(img, i * 8, j * 8, 8, 8);
       }
     }
@@ -41,6 +41,10 @@ class Level {
     level.createLevelImage();
   }
 }
+const blockEnum = {
+  AIR: 0,
+  WOOD: 1,
+};
 const level_manager = {
   "level": 0,
   "load": (n) => {

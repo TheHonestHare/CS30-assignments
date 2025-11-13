@@ -12,3 +12,4 @@
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
+[Grid based game](ball-lightning)

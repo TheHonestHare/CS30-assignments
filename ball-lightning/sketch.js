@@ -1,13 +1,24 @@
 /*
 Dracen Lim
 Computer Science 30
-Arrays and Objects Notation Assignment
+Grid based game
 
-2d platformer controls with placeholder assets
-A 2d world is "generated" in level.js under level_0 using arrays
-The Player class (player.js) keeps track of the keys using an object and initializes them using object notation
-My extra for experts is managing to implement working 2d sliding physics so that it is impossible for 2 objects to phase through each other even at high speeds (physics.js)
-This is a continuation of the first assignment
+This is a platformer where you need to place down abilities in order to use them
+
+Controls:
+L: toggle level editor. Use left click to place wood and right click to place air
+K: when at the signal tower, deletes the ability sequence
+   when not at the signal tower, resets the ability sequence
+J: activates the next ability in the sequence. There is currently only one ability: dash
+   J + WASD will cause the player to dash in the respective direction if they are touching a dash orb
+   Pressing J multiple times will move through the ability sequence.
+Left click (at signal tower) places a dash orb. The order in which the dash orbs are placed forms the ability sequence
+
+2d grid:
+Technically I didn't use a 2d grid but I think it still counts bc I used a 1d grid and indexed it with the formula [x * cols + y]
+  Check level_editor.js, level.js for example usage
+Extra for experts:
+  I explored static variables as seen in abilities.js for example
 */
 
 let level;
@@ -48,6 +59,7 @@ function draw() {
   level.draw();
   player.draw();
   abilities.placer.highlight_grid_pos();
+  level_editor.render_selection();
   abilities.draw();
 }
 
@@ -59,11 +71,19 @@ function keyPressed() {
       abilities.index = null;
     }
   }
+  if(key === 'l') {
+    level_editor.active = !level_editor.active;
+  }
   if(key === 'j') abilities.activate();
 
 }
 function mousePressed() {
   abilities.placer.onLeftClick();
+  level_editor.onMouseClick();
+}
+
+function mouseReleased(event) {
+  level_editor.onMouseRelease(event.button === 0);
 }
 
 function mouseWheel(event) {
