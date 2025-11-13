@@ -14,7 +14,7 @@ const level_editor = {
     stroke(255, 255, 0, 255);
     fill(0, 0, 0, 0);
     strokeWeight((sin(millis()/250)+1.5)*0.1);
-    rect(select_start.x, select_start.y, Math.max(1, mouse_grid_pos.x - select_start.x), Math.max(1, mouse_grid_pos.y - select_start.y));
+    rect(select_start.x, select_start.y, Math.max(1, mouse_grid_pos.x - select_start.x + 1), Math.max(1, mouse_grid_pos.y - select_start.y + 1));
   },
   onMouseClick(is_left) {
     if(!this.active) return;
@@ -36,8 +36,8 @@ const level_editor = {
     if(!between(topleft.x, -1, level.w) || !between(topleft.y, -1, level.h)) return;
     if(!between(botright.x, -1, level.w) || !between(botright.y, -1, level.h)) return;
 
-    for(let x = topleft.x; x < botright.x + 1; x++) {
-      for(let y = topleft.y; y < botright.y + 1; y++) {
+    for(let x = topleft.x; x < botright.x+1; x++) {
+      for(let y = topleft.y; y < botright.y+1; y++) {
         level.block_array[y * level.w + x] = material_index;
       }
     }
