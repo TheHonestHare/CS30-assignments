@@ -10,11 +10,11 @@ class Level {
     this.scene_items = [];
     scene_items.forEach((val) => {
       this.scene_items.push(SceneItems.processEntry(val));
-    })
+    });
     this.createLevelImage();
   }
   static fromObject(obj) {
-    return new Level(obj.block_array, obj.w, obj.h, obj.spawnx, obj.spawny, obj.scene_items)
+    return new Level(obj.block_array, obj.w, obj.h, obj.spawnx, obj.spawny, obj.scene_items);
   }
   draw() {
     noSmooth();
@@ -22,7 +22,7 @@ class Level {
     this.scene_items.forEach((val) => {
       val.tick();
       val.draw();
-    })
+    });
   }
   createLevelImage() {
     let img = createGraphics(this.w * 8, this.h * 8);
@@ -45,9 +45,8 @@ const level_manager = {
   "level": 0,
   "load": (n) => {
     switch(n) {
-      case 0: {
+      case 0: 
         return Level.fromObject(level0);
-      }
     }
   }
 };

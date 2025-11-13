@@ -201,7 +201,7 @@ const abilities = (() => {
           }
           
           smooth();
-        }
+        };
       }
     }
 

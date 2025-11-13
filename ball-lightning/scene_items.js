@@ -22,4 +22,4 @@ const SceneItems = {
     return new (SceneItems.nameMap.get(entry.type))(entry.data);
   }
 
-}
+};

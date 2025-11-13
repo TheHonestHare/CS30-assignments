@@ -5,7 +5,7 @@ export default [
   {
     files: ["**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx"],
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: "module",
       globals: {
         ADD: "readonly",
@@ -443,7 +443,7 @@ export default [
       },
     },
     rules: {
-      indent: ["warn", 2],
+      indent: ["warn", 2, { "SwitchCase": 1}],
       semi: ["warn", "always"],
       eqeqeq: ["warn", "always"],
       "no-floating-decimal": ["warn"],
