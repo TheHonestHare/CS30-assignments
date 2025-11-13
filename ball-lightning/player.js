@@ -57,6 +57,12 @@ class Player {
     
     this.applyGravity(deltaT);
     physics.do_collisions(player, deltaT);
+    if(this.aabb.origin.y > level.w + 5) this.respawn();
+  }
+
+  respawn() {
+    player.vel = createVector(0, 0);
+    player.aabb.origin = level.scene_items[0].aabb.origin.copy();
   }
   
   process_input() {
