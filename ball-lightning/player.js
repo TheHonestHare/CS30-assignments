@@ -57,7 +57,7 @@ class Player {
     
     this.applyGravity(deltaT);
     physics.do_collisions(player, deltaT);
-    if(this.aabb.origin.y > level.w + 5) this.respawn();
+    if(this.aabb.origin.y > level.h + 5) this.respawn();
   }
 
   respawn() {
