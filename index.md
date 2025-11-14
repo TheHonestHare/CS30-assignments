@@ -9,6 +9,7 @@
 - [Terrain generation](terrain-gen)
 - [Neighboring cells](cell-neightbors)
 - [Player in grid](player-in-grid)
+- [Fireworks](fireworks)
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
