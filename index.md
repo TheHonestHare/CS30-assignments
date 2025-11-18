@@ -10,6 +10,7 @@
 - [Neighboring cells](cell-neightbors)
 - [Player in grid](player-in-grid)
 - [Fireworks](fireworks)
+- [OOP nodes](oop-nodes)
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
