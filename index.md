@@ -11,6 +11,7 @@
 - [Player in grid](player-in-grid)
 - [Fireworks](fireworks)
 - [OOP nodes](oop-nodes)
+- [Serpinski](serpinsky)
 
 ## Assignments
 [Objects and Arrays](ball-lightning)
